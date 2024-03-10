@@ -919,7 +919,7 @@ dependencies = [
 
 [[package]]
 name = "bevy_picking_tilemap"
-version = "0.13.0"
+version = "0.13.0-pre"
 dependencies = [
  "bevy",
  "bevy_ecs_tilemap",

@@ -1,6 +1,6 @@
 [package]
 name = "bevy_picking_tilemap"
-version = "0.13.0"
+version = "0.13.0-pre"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/zacryol/bevy_picking_tilemap"
