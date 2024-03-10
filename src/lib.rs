@@ -16,7 +16,7 @@ use bevy::{
 };
 use bevy_ecs_tilemap::{
     map::{TilemapGridSize, TilemapSize, TilemapType},
-    tiles::{TilePos, TileStorage},
+    tiles::{TilePos, TileStorage, TileVisible},
 };
 use bevy_mod_picking::{
     backend::{HitData, PointerHits},
@@ -43,9 +43,9 @@ fn tile_picking(
         &TilemapType,
         &TileStorage,
         &GlobalTransform,
-        Option<&Pickable>,
         &ViewVisibility,
     )>,
+    tile_q: Query<(&TileVisible, Option<&Pickable>)>,
     mut output: EventWriter<PointerHits>,
 ) {
     for (p_id, p_loc) in pointers
@@ -78,7 +78,7 @@ fn tile_picking(
         let picks = tilemap_q
             .iter()
             .filter(|(.., vis)| vis.get())
-            .filter_map(|(t_s, tgs, tty, t_store, gt, pck, ..)| {
+            .filter_map(|(t_s, tgs, tty, t_store, gt, ..)| {
                 if blocked {
                     return None;
                 }
@@ -87,11 +87,15 @@ fn tile_picking(
                     let in_map_pos = gt.compute_matrix().inverse() * pos;
                     in_map_pos.xy()
                 };
-                let picked = TilePos::from_world_pos(&in_map_pos, t_s, tgs, tty)
-                    .and_then(|tile_pos| t_store.get(&tile_pos));
+                let picked: Entity = TilePos::from_world_pos(&in_map_pos, t_s, tgs, tty)
+                    .and_then(|tile_pos| t_store.get(&tile_pos))?;
+                let (vis, pck) = tile_q.get(picked).ok()?;
+                if !vis.0 {
+                    return None;
+                }
                 blocked = pck.is_some_and(|p| p.should_block_lower);
                 let depth = -cam_ortho.near - gt.translation().z;
-                picked.map(|e| (e, HitData::new(cam_entity, depth, None, None)))
+                Some((picked, HitData::new(cam_entity, depth, None, None)))
             })
             .collect();
 
