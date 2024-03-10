@@ -24,6 +24,9 @@ use bevy_mod_picking::{
     pointer::{PointerId, PointerLocation},
 };
 
+/// `bevy_ecs_tilemap` backend for `bevy_mod_picking`
+///
+/// The plugins provided by those two crates must be added separately.
 pub struct TilemapBackend;
 
 impl Plugin for TilemapBackend {

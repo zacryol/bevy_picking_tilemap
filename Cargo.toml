@@ -1,8 +1,13 @@
 [package]
 name = "bevy_picking_tilemap"
-version = "0.13.0-dev"
+version = "0.13.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/zacryol/bevy_picking_tilemap"
+authors = ["zacryol"]
+description = "bevy_mod_picking support for bevy_ecs_tilemap"
+keywords = ["gamdev", "bevy"]
+categories = ["game-development"]
 
 [dependencies]
 bevy = { version = "0.13.0", default-features = false }
