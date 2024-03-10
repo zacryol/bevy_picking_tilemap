@@ -24,6 +24,10 @@ use bevy_mod_picking::{
     pointer::{PointerId, PointerLocation},
 };
 
+// re-export ecs tilemap to make the custom branch easier for downstream
+// might remove this after the official 0.13 update
+pub use bevy_ecs_tilemap;
+
 /// `bevy_ecs_tilemap` backend for `bevy_mod_picking`
 ///
 /// The plugins provided by those two crates must be added separately.

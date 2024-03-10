@@ -2,9 +2,8 @@
 //! Click on a tile to change its texture.
 
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
 use bevy_mod_picking::prelude::*;
-use bevy_picking_tilemap::TilemapBackend;
+use bevy_picking_tilemap::{bevy_ecs_tilemap::prelude::*, TilemapBackend};
 use rand::Rng;
 
 const TILE_COUNT: u32 = 1078;

@@ -6,6 +6,8 @@ Tile entities to receive the picking events.
 
  - **Note:** `bevy_ecs_tilemap` has not been "officially" updated to support bevy 0.13 yet. The crate must be added to dependencies
    though this fork `bevy_ecs_tilemap = { git = "https://github.com/rparrett/bevy_ecs_tilemap", branch = "bevy13" }`
+   
+   - This branch is also re-exported by this crate.
 
 
 ## How to use
