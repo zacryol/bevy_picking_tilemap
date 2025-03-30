@@ -10,12 +10,12 @@ keywords = ["gamdev", "bevy"]
 categories = ["game-development"]
 
 [dependencies]
-bevy = { version = "0.14.0", default-features = false }
-bevy_ecs_tilemap = { version = "0.14.0", default-features = false }
-bevy_mod_picking = { version = "0.20.0", default-features = false }
+bevy = { version = "0.15", default-features = false }
+bevy_ecs_tilemap = { version = "0.15", default-features = false }
+bevy_picking = { version = "0.15", default-features = false }
 
 [dev-dependencies]
-bevy = "0.14.0"
-bevy_ecs_tilemap = "0.14"
-bevy_mod_picking = "0.20.0"
+bevy = "0.15"
+bevy_ecs_tilemap = "0.15"
+bevy_picking = { version = "0.15", default-features = false }
 rand = "0.8.5"
