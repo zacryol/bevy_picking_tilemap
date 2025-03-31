@@ -97,7 +97,7 @@ fn tile_picking(
                 if !vis.0 {
                     return None;
                 }
-                blocked = pck.is_some() && !matches!(pck_behavior, Some(&PickingBehavior::IGNORE));
+                blocked = pck.is_some() && matches!(pck_behavior, Some(&PickingBehavior::IGNORE));
 
                 let depth = -cam_ortho.near - gt.translation().z;
                 Some((picked, HitData::new(cam_entity, depth, None, None)))
