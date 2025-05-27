@@ -10,9 +10,9 @@ keywords = ["gamdev", "bevy"]
 categories = ["game-development"]
 
 [dependencies]
-bevy = { version = "0.15.0" }
+bevy = { version = "0.15.0", default-features = false, features = ["bevy_mesh_picking_backend", "bevy_window"] }
 bevy_ecs_tilemap = { version = "0.15.0", default-features = false }
-bevy_picking = { version = "0.15.0" }
+bevy_picking = { version = "0.15.0", default-features = false }
 
 [dev-dependencies]
 bevy = "0.15.0"

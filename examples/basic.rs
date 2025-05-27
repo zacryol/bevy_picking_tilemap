@@ -23,14 +23,12 @@ fn tilemap_startup(mut commands: Commands, asset_server: Res<AssetServer>) {
         for y in 0..map_size.y {
             let tile_pos = TilePos { x, y };
             let tile_entity = commands
-                .spawn((
-                    TileBundle {
-                        position: tile_pos,
-                        tilemap_id: TilemapId(tilemap_entity),
-                        texture_index: TileTextureIndex(0),
-                        ..default()
-                    },
-                ))
+                .spawn((TileBundle {
+                    position: tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    texture_index: TileTextureIndex(0),
+                    ..default()
+                },))
                 // The important part; each Tile has a picking handler to change the tile
                 // texture.
                 .observe(
@@ -69,7 +67,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins.set(ImagePlugin::default_nearest()),
             TilemapPlugin,
-            DefaultPickingPlugins,
+            //DefaultPickingPlugins,
             // The additional backend to check events against the tiles
             TilemapBackend,
         ))

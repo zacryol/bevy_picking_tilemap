@@ -19,7 +19,10 @@ use bevy_ecs_tilemap::{
     tiles::{TilePos, TileStorage, TileVisible},
 };
 use bevy_picking::{
-    backend::{HitData, PointerHits}, mesh_picking::RayCastPickable, pointer::{PointerId, PointerLocation}, PickSet, PickingBehavior
+    backend::{HitData, PointerHits},
+    mesh_picking::RayCastPickable,
+    pointer::{PointerId, PointerLocation},
+    PickSet, PickingBehavior,
 };
 
 pub use bevy_ecs_tilemap;
@@ -49,7 +52,11 @@ fn tile_picking(
         &GlobalTransform,
         &ViewVisibility,
     )>,
-    tile_q: Query<(&TileVisible, Option<&RayCastPickable>, Option<&PickingBehavior>)>,
+    tile_q: Query<(
+        &TileVisible,
+        Option<&RayCastPickable>,
+        Option<&PickingBehavior>,
+    )>,
     mut output: EventWriter<PointerHits>,
 ) {
     for (p_id, p_loc) in pointers
