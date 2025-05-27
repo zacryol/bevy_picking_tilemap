@@ -18,14 +18,12 @@ use bevy_ecs_tilemap::{
     map::{TilemapGridSize, TilemapSize, TilemapType},
     tiles::{TilePos, TileStorage, TileVisible},
 };
-use bevy_mod_picking::{
-    backend::{HitData, PointerHits},
-    picking_core::{PickSet, Pickable},
-    pointer::{PointerId, PointerLocation},
+use bevy_picking::{
+    backend::{HitData, PointerHits}, mesh_picking::RayCastPickable, pointer::{PointerId, PointerLocation}, PickSet, PickingBehavior
 };
 
 pub use bevy_ecs_tilemap;
-pub use bevy_mod_picking;
+pub use bevy_picking;
 
 /// `bevy_ecs_tilemap` backend for `bevy_mod_picking`
 ///
@@ -51,7 +49,7 @@ fn tile_picking(
         &GlobalTransform,
         &ViewVisibility,
     )>,
-    tile_q: Query<(&TileVisible, Option<&Pickable>)>,
+    tile_q: Query<(&TileVisible, Option<&RayCastPickable>, Option<&PickingBehavior>)>,
     mut output: EventWriter<PointerHits>,
 ) {
     for (p_id, p_loc) in pointers
@@ -76,7 +74,7 @@ fn tile_picking(
             continue;
         };
 
-        let Some(cursor_pos_world) = camera.viewport_to_world_2d(cam_transform, p_loc.position)
+        let Ok(cursor_pos_world) = camera.viewport_to_world_2d(cam_transform, p_loc.position)
         else {
             continue;
         };
@@ -95,11 +93,12 @@ fn tile_picking(
                 };
                 let picked: Entity = TilePos::from_world_pos(&in_map_pos, t_s, tgs, tty)
                     .and_then(|tile_pos| t_store.get(&tile_pos))?;
-                let (vis, pck) = tile_q.get(picked).ok()?;
+                let (vis, pck, pck_behavior) = tile_q.get(picked).ok()?;
                 if !vis.0 {
                     return None;
                 }
-                blocked = pck.is_some_and(|p| p.should_block_lower);
+                blocked = pck.is_some() && matches!(pck_behavior, Some(&PickingBehavior::IGNORE));
+
                 let depth = -cam_ortho.near - gt.translation().z;
                 Some((picked, HitData::new(cam_entity, depth, None, None)))
             })

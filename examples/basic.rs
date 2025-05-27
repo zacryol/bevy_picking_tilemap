@@ -3,7 +3,7 @@
 
 use bevy::prelude::*;
 use bevy_picking_tilemap::{
-    bevy_ecs_tilemap::prelude::*, bevy_mod_picking::prelude::*, TilemapBackend,
+    bevy_ecs_tilemap::prelude::*, bevy_picking::prelude::*, TilemapBackend,
 };
 use rand::Rng;
 
@@ -30,13 +30,19 @@ fn tilemap_startup(mut commands: Commands, asset_server: Res<AssetServer>) {
                         texture_index: TileTextureIndex(0),
                         ..default()
                     },
-                    // The important part; each Tile has a picking handler to change the tile
-                    // texture.
-                    On::<Pointer<Click>>::target_component_mut::<TileTextureIndex>(|_, t| {
-                        let mut rng = rand::thread_rng();
-                        t.0 = rng.gen_range(0..TILE_COUNT);
-                    }),
                 ))
+                // The important part; each Tile has a picking handler to change the tile
+                // texture.
+                .observe(
+                    |trigger: Trigger<Pointer<Click>>,
+                     mut tile_query: Query<&mut TileTextureIndex>| {
+                        let entity = trigger.entity();
+                        let mut rng = rand::rng();
+                        if let Ok(mut texture_index) = tile_query.get_mut(entity) {
+                            texture_index.0 = rng.random_range(0..TILE_COUNT);
+                        }
+                    },
+                )
                 .id();
             tile_storage.set(&tile_pos, tile_entity);
         }
