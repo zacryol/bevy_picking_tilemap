@@ -33,8 +33,8 @@ fn tilemap_startup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     |trigger: Trigger<Pointer<Click>>,
                      mut tile_query: Query<&mut TileTextureIndex>| {
                         let entity = trigger.target();
-                        let mut rng = rand::rng();
                         if let Ok(mut texture_index) = tile_query.get_mut(entity) {
+                            let mut rng = rand::rng();
                             texture_index.0 = rng.random_range(0..TILE_COUNT);
                         }
                     },

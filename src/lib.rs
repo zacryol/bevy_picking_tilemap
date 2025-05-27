@@ -1,4 +1,3 @@
-#![allow(clippy::needless_pass_by_value)]
 use bevy::{
     app::{Plugin, PreUpdate},
     ecs::{
@@ -8,18 +7,16 @@ use bevy::{
         system::{Query, Single},
     },
     math::{Vec2, Vec4},
-    prelude::{App, IntoScheduleConfigs, Vec4Swizzles},
-    render::{camera::Camera, view::ViewVisibility},
-    transform::components::GlobalTransform,
-    window::PrimaryWindow,
-};
-use bevy::{
     picking::{
         backend::{HitData, PointerHits},
         pointer::{PointerId, PointerLocation},
         PickSet, Pickable,
     },
+    prelude::{App, IntoScheduleConfigs, Vec4Swizzles},
     render::camera::Projection,
+    render::{camera::Camera, view::ViewVisibility},
+    transform::components::GlobalTransform,
+    window::PrimaryWindow,
 };
 use bevy_ecs_tilemap::{
     anchor::TilemapAnchor,
@@ -40,7 +37,7 @@ impl Plugin for TilemapBackend {
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[expect(clippy::type_complexity)]
 fn tile_picking(
     pointers: Query<(&PointerId, &PointerLocation)>,
     cameras: Query<(Entity, &Camera, &GlobalTransform, &Projection)>,
@@ -103,7 +100,6 @@ fn tile_picking(
                 }
                 blocked = pck.is_some() && matches!(pck, Some(&Pickable::IGNORE));
 
-                //let depth = -cam_ortho.near - gt.translation().z;
                 let depth = -match cam_ortho {
                     Projection::Orthographic(orth) => orth.near,
                     Projection::Perspective(per) => per.near, // TODO: is this correct?
@@ -113,8 +109,6 @@ fn tile_picking(
             })
             .collect();
 
-        // f32 required by PointerHits
-        #[allow(clippy::cast_precision_loss)]
         let order = camera.order as f32;
         output.write(PointerHits::new(*p_id, picks, order));
     }
