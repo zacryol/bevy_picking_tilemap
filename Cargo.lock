@@ -915,11 +915,10 @@ dependencies = [
 
 [[package]]
 name = "bevy_picking_tilemap"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "bevy",
  "bevy_ecs_tilemap",
- "bevy_picking",
  "rand 0.9.0",
 ]
 

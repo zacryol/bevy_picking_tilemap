@@ -2,9 +2,7 @@
 //! Click on a tile to change its texture.
 
 use bevy::prelude::*;
-use bevy_picking_tilemap::{
-    bevy_ecs_tilemap::prelude::*, bevy_picking::prelude::*, TilemapBackend,
-};
+use bevy_picking_tilemap::{bevy_ecs_tilemap::prelude::*, TilemapBackend};
 use rand::Rng;
 
 const TILE_COUNT: u32 = 1078;
@@ -34,7 +32,7 @@ fn tilemap_startup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .observe(
                     |trigger: Trigger<Pointer<Click>>,
                      mut tile_query: Query<&mut TileTextureIndex>| {
-                        let entity = trigger.entity();
+                        let entity = trigger.target();
                         let mut rng = rand::rng();
                         if let Ok(mut texture_index) = tile_query.get_mut(entity) {
                             texture_index.0 = rng.random_range(0..TILE_COUNT);
@@ -74,9 +72,16 @@ fn main() {
         .add_systems(
             Startup,
             (tilemap_startup, |mut commands: Commands| {
-                let mut cb = Camera2dBundle::default();
-                cb.projection.scale = 0.5;
-                commands.spawn(cb);
+                //let mut cb = Camera2dBundle::default();
+                //cb.projection.scale = 0.5;
+                //commands.spawn(cb);
+                commands.spawn((
+                    Camera2d,
+                    Projection::Orthographic(OrthographicProjection {
+                        scale: 0.5,
+                        ..OrthographicProjection::default_2d()
+                    }),
+                ));
             }),
         )
         .run();
