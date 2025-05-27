@@ -55,7 +55,7 @@ fn tilemap_startup(mut commands: Commands, asset_server: Res<AssetServer>) {
         storage: tile_storage,
         texture: TilemapTexture::Single(texture_handle),
         tile_size,
-        transform: get_tilemap_center_transform(&map_size, &grid_size, &map_type, 0.0),
+        anchor: TilemapAnchor::Center,
         ..Default::default()
     });
 }
@@ -65,16 +65,12 @@ fn main() {
         .add_plugins((
             DefaultPlugins.set(ImagePlugin::default_nearest()),
             TilemapPlugin,
-            //DefaultPickingPlugins,
             // The additional backend to check events against the tiles
             TilemapBackend,
         ))
         .add_systems(
             Startup,
             (tilemap_startup, |mut commands: Commands| {
-                //let mut cb = Camera2dBundle::default();
-                //cb.projection.scale = 0.5;
-                //commands.spawn(cb);
                 commands.spawn((
                     Camera2d,
                     Projection::Orthographic(OrthographicProjection {

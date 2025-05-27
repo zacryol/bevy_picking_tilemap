@@ -29,9 +29,9 @@ use bevy_ecs_tilemap::{
 
 pub use bevy_ecs_tilemap;
 
-/// `bevy_ecs_tilemap` backend for `bevy_mod_picking`
+/// picking backend for `bevy_ecs_tilemap`
 ///
-/// The plugins provided by those two crates must be added separately.
+/// The plugins for picking and tilemaps must be added separately
 pub struct TilemapBackend;
 
 impl Plugin for TilemapBackend {
