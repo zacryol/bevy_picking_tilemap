@@ -1,7 +1,12 @@
 #![allow(clippy::needless_pass_by_value)]
 use bevy::{
     app::{Plugin, PreUpdate},
-    ecs::{entity::Entity, event::EventWriter, query::With, system::Query},
+    ecs::{
+        entity::Entity,
+        event::EventWriter,
+        query::With,
+        system::{Query, Single},
+    },
     math::{Vec2, Vec4},
     prelude::{App, IntoScheduleConfigs, Vec4Swizzles},
     render::{camera::Camera, view::ViewVisibility},
@@ -39,7 +44,7 @@ impl Plugin for TilemapBackend {
 fn tile_picking(
     pointers: Query<(&PointerId, &PointerLocation)>,
     cameras: Query<(Entity, &Camera, &GlobalTransform, &Projection)>,
-    primary_window: Query<Entity, With<PrimaryWindow>>,
+    primary_window: Option<Single<Entity, With<PrimaryWindow>>>,
     tilemap_q: Query<(
         &TilemapSize,
         &TilemapGridSize,
@@ -64,12 +69,9 @@ fn tile_picking(
             .find(|(_, camera, _, _)| {
                 camera
                     .target
-                    .normalize(Some(match primary_window.get_single() {
-                        Ok(w) => w,
-                        Err(_) => return false,
-                    }))
-                    .unwrap()
-                    == p_loc.target
+                    .normalize(primary_window.as_deref().copied()
+                    )
+                    .is_some_and(|p| p == p_loc.target)
             })
         else {
             continue;
@@ -114,6 +116,6 @@ fn tile_picking(
         // f32 required by PointerHits
         #[allow(clippy::cast_precision_loss)]
         let order = camera.order as f32;
-        output.send(PointerHits::new(*p_id, picks, order));
+        output.write(PointerHits::new(*p_id, picks, order));
     }
 }
