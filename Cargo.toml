@@ -1,21 +1,19 @@
 [package]
 name = "bevy_picking_tilemap"
-version = "0.14.0"
+version = "0.16.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/zacryol/bevy_picking_tilemap"
 authors = ["zacryol"]
 description = "bevy_mod_picking support for bevy_ecs_tilemap"
-keywords = ["gamdev", "bevy"]
+keywords = ["gamedev", "bevy"]
 categories = ["game-development"]
 
 [dependencies]
-bevy = { version = "0.14.0", default-features = false }
-bevy_ecs_tilemap = { version = "0.14.0", default-features = false }
-bevy_mod_picking = { version = "0.20.0", default-features = false }
+bevy = { version = "0.16.0", default-features = false, features = ["bevy_mesh_picking_backend", "bevy_window"] }
+bevy_ecs_tilemap = { version = "0.16.0", default-features = false }
 
 [dev-dependencies]
-bevy = "0.14.0"
-bevy_ecs_tilemap = "0.14"
-bevy_mod_picking = "0.20.0"
-rand = "0.8.5"
+bevy = "0.16.0"
+bevy_ecs_tilemap = "0.16.0"
+rand = "0.9.0"

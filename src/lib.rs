@@ -1,35 +1,34 @@
-#![allow(clippy::needless_pass_by_value)]
-
 use bevy::{
     app::{Plugin, PreUpdate},
     ecs::{
-        entity::Entity, event::EventWriter, query::With, schedule::IntoSystemConfigs, system::Query,
+        entity::Entity,
+        event::EventWriter,
+        query::With,
+        system::{Query, Single},
     },
     math::{Vec2, Vec4},
-    prelude::{App, Vec4Swizzles},
-    render::{
-        camera::{Camera, OrthographicProjection},
-        view::ViewVisibility,
+    picking::{
+        backend::{HitData, PointerHits},
+        pointer::{PointerId, PointerLocation},
+        PickSet, Pickable,
     },
+    prelude::{App, IntoScheduleConfigs, Vec4Swizzles},
+    render::camera::Projection,
+    render::{camera::Camera, view::ViewVisibility},
     transform::components::GlobalTransform,
     window::PrimaryWindow,
 };
 use bevy_ecs_tilemap::{
-    map::{TilemapGridSize, TilemapSize, TilemapType},
+    anchor::TilemapAnchor,
+    map::{TilemapGridSize, TilemapSize, TilemapTileSize, TilemapType},
     tiles::{TilePos, TileStorage, TileVisible},
-};
-use bevy_mod_picking::{
-    backend::{HitData, PointerHits},
-    picking_core::{PickSet, Pickable},
-    pointer::{PointerId, PointerLocation},
 };
 
 pub use bevy_ecs_tilemap;
-pub use bevy_mod_picking;
 
-/// `bevy_ecs_tilemap` backend for `bevy_mod_picking`
+/// picking backend for `bevy_ecs_tilemap`
 ///
-/// The plugins provided by those two crates must be added separately.
+/// The plugins for picking and tilemaps must be added separately
 pub struct TilemapBackend;
 
 impl Plugin for TilemapBackend {
@@ -38,15 +37,17 @@ impl Plugin for TilemapBackend {
     }
 }
 
-#[allow(clippy::type_complexity)]
+#[expect(clippy::type_complexity)]
 fn tile_picking(
     pointers: Query<(&PointerId, &PointerLocation)>,
-    cameras: Query<(Entity, &Camera, &GlobalTransform, &OrthographicProjection)>,
-    primary_window: Query<Entity, With<PrimaryWindow>>,
+    cameras: Query<(Entity, &Camera, &GlobalTransform, &Projection)>,
+    primary_window: Option<Single<Entity, With<PrimaryWindow>>>,
     tilemap_q: Query<(
         &TilemapSize,
         &TilemapGridSize,
+        &TilemapTileSize,
         &TilemapType,
+        &TilemapAnchor,
         &TileStorage,
         &GlobalTransform,
         &ViewVisibility,
@@ -65,18 +66,15 @@ fn tile_picking(
             .find(|(_, camera, _, _)| {
                 camera
                     .target
-                    .normalize(Some(match primary_window.get_single() {
-                        Ok(w) => w,
-                        Err(_) => return false,
-                    }))
-                    .unwrap()
-                    == p_loc.target
+                    .normalize(primary_window.as_deref().copied()
+                    )
+                    .is_some_and(|p| p == p_loc.target)
             })
         else {
             continue;
         };
 
-        let Some(cursor_pos_world) = camera.viewport_to_world_2d(cam_transform, p_loc.position)
+        let Ok(cursor_pos_world) = camera.viewport_to_world_2d(cam_transform, p_loc.position)
         else {
             continue;
         };
@@ -84,7 +82,7 @@ fn tile_picking(
         let picks = tilemap_q
             .iter()
             .filter(|(.., vis)| vis.get())
-            .filter_map(|(t_s, tgs, tty, t_store, gt, ..)| {
+            .filter_map(|(t_s, tgs, tts, tty, t_anchor, t_store, gt, _)| {
                 if blocked {
                     return None;
                 }
@@ -93,21 +91,25 @@ fn tile_picking(
                     let in_map_pos = gt.compute_matrix().inverse() * pos;
                     in_map_pos.xy()
                 };
-                let picked: Entity = TilePos::from_world_pos(&in_map_pos, t_s, tgs, tty)
-                    .and_then(|tile_pos| t_store.get(&tile_pos))?;
+                let picked: Entity =
+                    TilePos::from_world_pos(&in_map_pos, t_s, tgs, tts, tty, t_anchor)
+                        .and_then(|tile_pos| t_store.get(&tile_pos))?;
                 let (vis, pck) = tile_q.get(picked).ok()?;
                 if !vis.0 {
                     return None;
                 }
-                blocked = pck.is_some_and(|p| p.should_block_lower);
-                let depth = -cam_ortho.near - gt.translation().z;
+                blocked = pck.is_some() && matches!(pck, Some(&Pickable::IGNORE));
+
+                let depth = -match cam_ortho {
+                    Projection::Orthographic(orth) => orth.near,
+                    Projection::Perspective(per) => per.near, // TODO: is this correct?
+                    Projection::Custom(_) => todo!("idk"),
+                } - gt.translation().z;
                 Some((picked, HitData::new(cam_entity, depth, None, None)))
             })
             .collect();
 
-        // f32 required by PointerHits
-        #[allow(clippy::cast_precision_loss)]
         let order = camera.order as f32;
-        output.send(PointerHits::new(*p_id, picks, order));
+        output.write(PointerHits::new(*p_id, picks, order));
     }
 }
